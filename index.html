@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // string=>number
+        console.log('32' * 1 );//32
+        console.log('32'.valueOf() );//32
+        console.log(Number.isNaN(NaN))//true
+        console.log(NaN !== NaN);//true
+        console.log('ds' * 1 );//NaN
+        console.log(undefined * 1 );//NaN
+        console.log(null * 1 );//0
+        console.log(1 * {valueOf: () => '3'});//3
+        console.log(+ '123');//123
+        console.log(+ 'ds');//NaN
+        console.log(+ null);//0
+        console.log(+ undefined);//NaN
+        console.log(+ {valueOf:() => '3'});//3
+
+        // object => string
+        console.log('the Math object:' + Math);//"the Math object:[object Math]"
+        console.log('the JSON object:' + JSON);//"the JSON object:[object JSON]"
+        console.log('the JSON object:' + JSON.toString());//"the JSON object:[object JSON]"
+
+        console.log(2 * {valueOf:() => '3'});//6
+        console.log('J' + {toString:() => 'S'});//'JS'
+        console.log('' + {toString:() => 'S', valueOf:() => 'J'});//'J'
+
+        // 筛选假值 （false null 0 "" undefined NaN）
+        const compact = arr => arr.filter(Boolean);
+        console.log(compact([false, null, 0, "", undefined, NaN]));
+        //双位运算符取整
+        console.log(~~4.5);//4
+        console.log(Math.floor(4.5));//4
+        console.log(Math.ceil(4.5));//5
+
+        console.log(~~-4.5);//-4
+        console.log(Math.ceil(-4.5));//-4
+        console.log(Math.floor(-4.5));//-5
+        //取整
+        console.log(1.3 | 0);//1
+        console.log(-1.9 | 0);//-1
+        //判断奇偶数
+        console.log(!!(3 & 1));//true 3为基数
+        console.log(!!(3 % 2));//true 3为基数
+
+        //短路运算符
+        //&& 取假运算
+        //|| 取真运算
+
+        //函数默认值
+        func = (l, m = 3, n = 4) => (l * m * n);
+        console.log(func(2));//24 2*3*4
+
+        //强制参数
+        mandatory = () => {
+            throw new Error('Missing parameter!');
+        }
+        foo = (bar = mandatory()) => {
+            return bar;
+        }
+        // console.log(foo());
+
+        //隐式返回值
+        calcCircumference = diameter => (Math.PI * diameter);
+
+        //惰性载入函数
+        function foo() {
+            if(a !== b) {
+                console.log('aaa');
+            }else {
+                console.log('bbb');
+            }
+        }
+        // =>
+        function foo() {
+            if(a !== b) {
+                foo = function() {
+                    console.log('aaa');
+                }
+            }else{
+                foo = function() {
+                    console.log('bbb');
+                }
+            }
+            return foo();
+        }
+
+        //一次性函数
+        var sca = function() {
+            console.log('msg');
+            sca = function() {
+                console.log('foo');
+            }
+        }
+        sca();//'msg'
+        sca();//'foo'
+        sca();//'foo'
+
+        //字符串比较时间先后
+        var a = "2014-08-08";
+        var b = "2014-09-09";
+        console.log(a < b);//true
+        console.log("21:00" < "09:10");//false
+
+        //不同进制表示法
+        //29
+        //035      8进制
+        //0o35     8进制  es6方式
+        //0x1d     16进制
+        //0b11101  2进制   032
+
+        //精确到指定位数的小数Math.round(X * 100) / 100
+        const round = (n, decimals = 0) => Number(`${Math.round(`${n}e${decimals}`)}e-${decimals}`);
+        console.log(round(1.345, 1));//1.3
+        console.log(round(1.345, 2));//1.35
+
+        //补0操作
+        const addZero1 = (num, len = 2) => (`0${num}`).slice(-len);
+        const addZero2 = (num, len = 2) => (`${num}`).padStart(len, '0');
+        console.log(addZero1(3));//03
+        console.log(addZero2(32, 4));//0032
+
+        //reduce同时实现map和filter
+        const numbers = [10, 20, 30, 40];
+        const doubleOver50 = numbers.reduce((finalList, num) => {
+            num = num * 50;
+            if(num > 50) {
+                finalList.push(num);
+            }
+            return finalList;
+        }, []);
+        console.log(doubleOver50);
+
+        //reduce统计数组中相同项的个数
+        var cars = ['BMW', 'Benz', 'Tesla', 'BMW', 'Toyota'];
+        var carsObj = cars.reduce((obj, name) => {
+            obj[name] = obj[name] ? ++obj[name] : 1;
+            return obj;
+        }, {});
+        console.log(carsObj);
+
+        //使用解构来交换参数数值
+        let paramA = 10,
+            paramB = 20;
+        // [paramA, paramB] = [paramB, paramA];
+        paramA = paramA + paramB;
+        paramB = paramA - paramB;
+        paramA = paramA - paramB;
+        console.log(paramA);
+        console.log(paramB);
+
+        //接收函数返回的多个结果
+        async function getFullPost() {
+            return await Promise.all([
+                fetch('/post'),
+                fetch('/comments')
+            ]);
+        }
+        // const [post, comments] = getFullPost();
+
+        //将数组平铺到指定深度 depth指平铺几层
+        const flatten = (arr, depth = 1) => (
+            depth != 1
+                ? arr.reduce((a, v) => a.concat(Array.isArray(v) ? flatten(v, depth - 1) : v), [])
+                : arr.reduce((a, v) => a.concat(v), [])
+        )
+
+        console.log(flatten([1, [2], 3, 4]));
+        console.log(flatten([1, [2, [3, [4]]], 5], 2));
+
+        //数组的对象解构
+        const {2: aa, 4: bb} = [1,2,3,4,5,6];
+        console.log(aa);
+        console.log(bb);
+
+        //使用解构删除不必要属性
+        let {_internal, tooBig, ...cleanObject} = {el1: '1', _internal: '2', el2: '3', tooBig: '4', el3: '4'};
+        console.log(cleanObject);
+
+        //在函数参数中解构嵌套对象
+        var car = {
+            model: 'i am is a ',
+            engine: {
+                v6: true,
+                turto: true,
+                vin: 'big big girl'
+            }
+        }
+        const modelAndVin = ({model, engine: {vin}}) => {
+            console.log(`${model}${vin}`);
+        }
+        modelAndVin(car);
+
+        //代码复用，表单验证
+        const schema = {
+            first: {
+                required: true
+            },
+            last: {
+                required: true
+            }
+        }
+        const validate = (schema, values) => {
+            for(field in schema) {
+                if(schema[field].required) {
+                    if(!values[field]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        console.log(validate(schema, {first: 'Bruce'}));
+
+    </script>
+</body>
+</html>
