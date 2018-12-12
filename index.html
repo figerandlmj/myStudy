@@ -288,9 +288,280 @@
         }
         console.log(myTrim('    asdf    '))
 
+        //Symbol 一种新的原始数据类型，表示独一无二的值
+        //Symbol值不能与其他类型的值进行运算
+        var s1 = Symbol();
+        var s2 = Symbol();
+        console.log(s1 === s2);//false;
+        var ss1 = Symbol('foo');
+        var ss2 = Symbol('foo');
+        console.log(ss1 === ss2);//false
 
+        //作为属性名的Symbol
+        //Symbol值作为对象属性名时，不能用点运算符
+        //这里的Symbol在类外部也是可以访问的，只是不会出现在for...in、for...of循环中，
+        // 也不会被Object.keys()、Object.getOwnPropertyNames()返回。
+        // 但有一个Object.getOwnPropertySymbols方法，可以获取指定对象的所有Symbol属性名
+        var mySymbol = Symbol();
+        //第一种写法
+        // var a = {};
+        // a[mySymbol] = 'hello';
+        //第二种写法
+        // var a = {
+        //     [mySymbol]: 'Hello!'
+        // };
+        //第三种写法
+        var objA = {};
+        Object.defineProperty(objA, mySymbol, {
+            value: 'Hello!'
+        });
+        console.log(objA[mySymbol]);//Hello!
 
+        //Symbol.for机制有点类似于单例模式，
+        // 首先在全局中搜索有没有以该参数作为名称的Symbol值，
+        // 如果有，就返回这个Symbol值，否则就新建并返回一个以该字符串为名称的Symbol值。
+        // 和直接的Symbol就点不同了
 
+        // var s1 = Symbol.for('foo');
+        // var s2 = Symbol.for('foo');
+        // console.lo(s1 === s2) // true
+
+        //Symbol.keyFor方法返回一个已登记的Symbol类型值的key。
+        // 实质就是检测该Symbol是否已创建
+
+        // var s1 = Symbol.for("foo");
+        // Symbol.keyFor(s1) // "foo"
+        //
+        // var s2 = Symbol("foo");
+        // Symbol.keyFor(s2) // undefined
+
+        //单例模式
+        class Singleton {
+            constructor(age) {
+                this.age = age;
+            }
+            static getInstance(age) {
+                const instance = Symbol.for('instance');//防止被覆盖
+                if(!Singleton[instance]) {
+                    Singleton[instance] = new Singleton(age);
+                }
+                return Singleton[instance];
+            }
+        }
+        const singleton = Singleton.getInstance(30);
+        const singleton2 = Singleton.getInstance(20);
+        console.log(singleton === singleton2);//true
+
+        //策略模式
+        //策略类 封装具体的算法
+        //环境类 负责接收客户的请求并派发到策略类
+        // const calculateBonus = function(performanceLevel, salary) {
+        //     if(performanceLevel === 'S') {
+        //         return salary * 4;
+        //     }
+        //     if(performanceLevel === 'A') {
+        //         return salary * 3;
+        //     }
+        //     if(performanceLevel === 'B') {
+        //         return salary * 2;
+        //     }
+        // }
+        // console.log(calculateBonus('B', 20000));
+
+        //=>策略模式
+        const strategyTypes = {
+            S: Symbol.for('S'),
+            A: Symbol.for('A'),
+            B: Symbol.for('B')
+        };
+        //策略类
+        const strategies = {
+            [strategyTypes.S](salary) {
+                return salary * 4;
+            },
+            [strategyTypes.A](salary) {
+                return salary * 3;
+            },
+            [strategyTypes.B](salary) {
+                return salary * 2;
+            }
+        }
+        //环境类
+        const calculateBonus = function(level, salary) {
+            return strategies[level](salary);
+        }
+        console.log(calculateBonus(strategyTypes.B, 20000));
+
+        //JavaScript遍历、枚举与迭代
+        //for循环
+        var arr = ['element1', 'element2', 'element3'];
+        for(var i = 0, len = arr.length; i < len; i ++) {
+            console.log(arr[i]);
+        }
+        //数组自带方法forEach
+        arr.forEach(function(value, index, arr) {
+            if(index === 1) {
+                break;//不起作用
+            }else{
+                console.log(value);
+            }
+        })
+        //for in
+        for(var i in arr) {
+            console.log(arr[i])
+        }
+        //遍历对象 Object.getOwnPropertyDescriptor(targetObj, attrName) 查看对象的某个属性是否可枚举
+        for(let attr in obj) {
+            if(obj.hasOwnProperty(attr)) {
+                console.log(attr, obj[attr]);
+            }
+        }
+        //遍历字符串
+        for(var i in str) {
+            console.log(str[i]);
+        }
+
+        //vue 的数据双向绑定 Object.defineProperty(对象，属性，属性描叙对象集)
+        var Book = {};
+        var name = '';
+        Object.defineProperty(Book, 'name', {
+            set: function(value) {
+                name = value;
+                console.log('你取的名字叫做' + value);
+            },
+            get: function() {
+                return '《' + name + '》';
+            }
+        });
+        Book.name = 'vue权威指南';
+        console.log(Book.name);
+
+        //监听器 observe
+        function defineReactive(data, key, val) {
+            observe(val);//递归遍历所有子属性
+            var dep = new Dep()
+            Object.defineProperty((data, key, {
+                enumerable: true,
+                configurable: true,
+                get: function() {
+                    if(Dep.target) {//是否需要添加订阅者
+                        dep.addSub(Dep.target);//添加订阅者
+                    }
+                    return val;
+                },
+                set: function(newVal) {
+                    if(newVal === val) {
+                        return
+                    }
+                    val = newVal;
+                    console.log('属性' + key + '已经被监听了，直线值为：' + newVal.toString());
+                    dep.notify()//如果数据变化，通知所有订阅者
+                }
+            }))
+        }
+        Dep.target = null;
+        function observe(data) {
+            if(!data || typeof data !== 'object') {
+                return;
+            }
+            Object.keys(data).forEach(function(key) {
+                defineReactive(data, key, data[key]);
+            });
+        }
+        var library = {
+            book1: {
+                name: ''
+            },
+            book2: ''
+        }
+        observe(library);
+        library.book1.name = 'vue权威指南';
+        library.book2 = '没有此书籍';
+
+        //消息订阅器
+        function Dep() {
+            this.subs = []
+        }
+        Dep.prototype = {
+            addSub: function(sub) {
+                this.subs.push(sub)
+            },
+            notify: function() {
+                this.subs.forEach(function(sub) {
+                    sub.update();
+                })
+            }
+        }
+
+        //订阅者watcher
+        function Watcher(vm, exp, cb) {
+            this.cb = cb;
+            this.vm = vm;
+            this.exp = exp;
+            this.value = this.get();//讲自己添加到订阅器的操作
+        }
+        Watcher.prototype = {
+            update: function() {
+                this.run();
+            },
+            run: function() {
+                var value = this.vm.data[this.exp];
+                var oldVal = this.value;
+                if(value !== oldVal) {
+                    this.value = value;
+                    this.cb.call(this.vm, value, oldVal);
+                }
+            },
+            get: function() {
+                Dep.target = this;//缓存自己
+                var value = this.vm.data[this.exp]//强制执行监听器里的get函数
+                Dep.target = null;//释放自己
+                return value;
+            }
+        }
+
+        //关联observe和watcher
+        // function selfVue (data, el, exp) {
+        //     this.data = data;
+        //     observe(data);
+        //     el.innerHTML = this.data[exp];//初始化模板数据的值
+        //     new Watcher(this, exp, function(value) {
+        //         el.innerHTML = value;
+        //     });
+        //     return this;
+        // }
+        function selfVue (options) {
+            var self = this;
+            this.data = options.data;
+            this.methods = options.methods;
+            Object.keys(this.data).forEach(function(key) {
+                self.proxyKeys(key);
+            })
+            observe(this.data);
+            new Compile(options.el, this);
+            options.mounted.call(this);//所有事情处理好后执行mounted函数
+        }
+
+        //指令解析器
+        function compile(node) {
+            var nodeAttrs = node.attributes;
+            var self = this;
+            Array.prototype.forEach.call(nodeAttrs, function(attr) {
+                var attrName = attr.name;
+                if(self.isDirective(attrName)) {
+                    var exp = attr.value;
+                    var dir = attrName.substring(2);
+                    if(self.isEventDirective(dir)){//事件指令
+                        self.compileEvent(node, self.vm, exp, dir);
+                    }else {//v-model指令
+                        self.compileModel(node, self.vm, exp, dir);
+                    }
+                    node.removeAttribute(attrName);
+                }
+            })
+        }
+
+        //智能分析 抖音
 
     </script>
 </body>
