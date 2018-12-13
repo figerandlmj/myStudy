@@ -8,6 +8,17 @@
     <title>Document</title>
 </head>
 <body>
+
+    工作总结：
+        11月份的工作大部分集中在米融项目的1.7新需求开发上，
+        主要是页面整体风格改版，还有大额长期、h5认证模块、我的、确认借钱页新增学生弹框和设置银行卡支付密码以及新增埋点数据等等。
+        虽然中间bug重重，但是最终还是完美上线。
+        其他就是风控系统交接，双11活动测试期的修改，还有公司官网和米融官网的一些修改等。
+    个人总结：
+        对于米融项目的延期和之后的一些bug反馈上，我确实有一些问题存在，比如不够认真。
+        但是由于是接手别人的项目，并且文档不完善等原因所导致的。
+        在以后的工作中，希望自己对于工作中的各项任务都能认证对待，在指定期内努力做到完善。
+
     <script>
         // string=>number
         console.log('32' * 1 );//32
@@ -375,17 +386,17 @@
             B: Symbol.for('B')
         };
         //策略类
-        const strategies = {
-            [strategyTypes.S](salary) {
-                return salary * 4;
-            },
-            [strategyTypes.A](salary) {
-                return salary * 3;
-            },
-            [strategyTypes.B](salary) {
-                return salary * 2;
-            }
-        }
+        // const strategies = {
+        //     [strategyTypes.S](salary) {
+        //         return salary * 4;
+        //     },
+        //     [strategyTypes.A](salary) {
+        //         return salary * 3;
+        //     },
+        //     [strategyTypes.B](salary) {
+        //         return salary * 2;
+        //     }
+        // }
         //环境类
         const calculateBonus = function(level, salary) {
             return strategies[level](salary);
@@ -561,7 +572,93 @@
             })
         }
 
-        //智能分析 抖音
+        //导航守卫
+        //router(VueRouter实例)守卫 全局路由守卫
+        //route 路由守卫
+        //component 组件守卫
+        router.beforeEach(function(to, from) {
+            console.log(to, from);
+            if(to.path == '/about/blog') {
+                if(to.matched[0].meta.is_login) {
+                    next()
+                }else{
+                    // next('/about/login');
+                    next({path: '/about/login', params: {}});
+                }
+            }else if(to.path == '/about/login') {
+                if(!to.matched[0].meta.is_login) {
+                    next()
+                }else{
+                    next(from.path);
+                }
+            }else{
+                next();
+            }
+        })
+
+        function login() {
+            this.$route.matched[0].meta.is_login = true;
+            this.$route.push('/about/blog');
+        }
+        //route 路由守卫
+        // {
+        //     name: 'login',
+        //     path: '/login',
+        //     component: Login,
+        //     meta: {
+        //        index: 3,
+        //        is_login: false
+        //     },
+        //     beforeEnter(to, from, next) {
+        //         console.log(to, from);
+        //         if(to.meta.is_login) {
+        //             next(from.path);
+        //         }else{
+        //             next()
+        //         }
+        //     }
+        // }
+
+        //component 组件守卫
+        // export default {
+        //     beforeRouteEnter(to, from, next) {
+        //        console.log(to, from);
+        //        console.log('beforeRouteEnter');// 1
+        //        next(vm => console.log(vm.title = 'MyHome'));//3
+        //     },
+        //     beforeCreate() {
+        //         console.log('beforeCreate');//2
+        //     },
+        //     data() {
+        //         return {
+        //             title: 'Home'
+        //         }
+        //     }
+        // }
+
+        //路由懒加载
+        //npm install --save-dev babel-plugin-syntax-dynamic-import
+        //vue-loader.conf.js
+        // transformToRequire: {
+        //     video: ['src', 'poster'],
+        //     source: 'src',
+        //     img: 'src',
+        //     image: 'xlink:href',
+        //     plugins: ['syntax-dynamic-import']
+        // }
+        //
+        // {
+        //     path: '/doc',
+        //     name: 'doc',
+        //     meta: {
+        //         index: 1
+        //     },
+        //     component: () => import('../components/doc.vue')
+        // }
+
+        PM
+        RD
+
 
     </script>
 </body>
